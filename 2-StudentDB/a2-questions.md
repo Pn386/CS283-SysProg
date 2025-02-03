@@ -5,7 +5,9 @@ Please answer the following questions and submit in your repo for the second ass
 
 1. In this assignment I asked you provide an implementation for the `get_student(...)` function because I think it improves the overall design of the database application.   After you implemented your solution do you agree that externalizing `get_student(...)` into it's own function is a good design strategy?  Briefly describe why or why not.
 
-    > **Answer**:  _start here_
+    > **Answer**:  Yes, externalizing get_student(...) into its own function is a good design strategy. It promotes modularity and reusability, making the code easier to maintain and test. By separating the logic for retrieving a student record into a dedicated function, the code becomes more organized, and the function can be reused in other parts of the application without duplicating code. Additionally, it adheres to the Single Responsibility Principle, where each function has a clear and specific purpose.
+
+
 
 2. Another interesting aspect of the `get_student(...)` function is how its function prototype requires the caller to provide the storage for the `student_t` structure:
 
@@ -39,7 +41,9 @@ Please answer the following questions and submit in your repo for the second ass
     ```
     Can you think of any reason why the above implementation would be a **very bad idea** using the C programming language?  Specifically, address why the above code introduces a subtle bug that could be hard to identify at runtime? 
 
-    > **ANSWER:** _start here_
+    > **ANSWER:** The implementation shown is problematic because it returns a pointer to a local variable (student), which is allocated on the stack. Once the function returns, the stack frame for get_student(...) is destroyed, and the pointer to student becomes invalid. Accessing this pointer after the function returns would lead to undefined behavior, as the memory it points to may be overwritten by other function calls. This is a subtle bug that could cause crashes or unpredictable behavior at runtime, making it difficult to debug.
+
+
 
 3. Another way the `get_student(...)` function could be implemented is as follows:
 
@@ -72,7 +76,17 @@ Please answer the following questions and submit in your repo for the second ass
     ```
     In this implementation the storage for the student record is allocated on the heap using `malloc()` and passed back to the caller when the function returns. What do you think about this alternative implementation of `get_student(...)`?  Address in your answer why it work work, but also think about any potential problems it could cause.  
     
-    > **ANSWER:** _start here_  
+    > **ANSWER:** This implementation works because the storage for the student record is allocated on the heap, which persists after the function returns. However, it introduces potential issues:
+
+Memory Management Responsibility: The caller must remember to free the allocated memory to avoid memory leaks. If the caller forgets to call free(), the program will leak memory.
+
+Error Handling: If malloc() fails (e.g., due to insufficient memory), the function returns NULL, which the caller must handle appropriately.
+
+Performance Overhead: Frequent allocation and deallocation of small memory blocks can lead to fragmentation and performance degradation.
+
+While this approach is valid, it shifts the burden of memory management to the caller, which can be error-prone.
+
+
 
 
 4. Lets take a look at how storage is managed for our simple database. Recall that all student records are stored on disk using the layout of the `student_t` structure (which has a size of 64 bytes).  Lets start with a fresh database by deleting the `student.db` file using the command `rm ./student.db`.  Now that we have an empty database lets add a few students and see what is happening under the covers.  Consider the following sequence of commands:
@@ -102,11 +116,19 @@ Please answer the following questions and submit in your repo for the second ass
 
     - Please explain why the file size reported by the `ls` command was 128 bytes after adding student with ID=1, 256 after adding student with ID=3, and 4160 after adding the student with ID=64? 
 
-        > **ANSWER:** _start here_
+        > **ANSWER:** The file size reported by ls corresponds to the logical size of the file, which is determined by the file's metadata. When a student is added, the file is extended to accommodate the new record. For example:
+
+Adding student ID=1 writes 64 bytes, so the file size becomes 128 bytes (likely due to alignment or metadata).
+
+Adding student ID=3 writes another 64 bytes, increasing the file size to 256 bytes.
+
+Adding student ID=64 writes a record at an offset of 64 * 64 = 4096 bytes, extending the file size to 4160 bytes.
+
+
 
     -   Why did the total storage used on the disk remain unchanged when we added the student with ID=1, ID=3, and ID=63, but increased from 4K to 8K when we added the student with ID=64? 
 
-        > **ANSWER:** _start here_
+        > **ANSWER:** The du command reports the actual disk space used, which is allocated in fixed-size blocks (typically 4KB). When the file size is small (e.g., 128 or 256 bytes), it still occupies one 4KB block on disk. Adding students with IDs 1, 3, and 63 does not exceed the first 4KB block, so the disk usage remains unchanged. However, adding student ID=64 requires a new block, increasing the disk usage from 4KB to 8KB.
 
     - Now lets add one more student with a large student ID number  and see what happens:
 
@@ -119,4 +141,4 @@ Please answer the following questions and submit in your repo for the second ass
         ```
         We see from above adding a student with a very large student ID (ID=99999) increased the file size to 6400000 as shown by `ls` but the raw storage only increased to 12K as reported by `du`.  Can provide some insight into why this happened?
 
-        > **ANSWER:**  _start here_
+        > **ANSWER:**  When adding a student with ID=99999, the file is extended to an offset of 99999 * 64 = 6,399,936 bytes, resulting in a logical file size of 6,400,000 bytes (rounded up). However, the file is sparse, meaning that only the blocks containing actual data are allocated on disk. Since only a few blocks are written (e.g., for the metadata and the new record), the actual disk usage increases minimally, from 8KB to 12KB. Sparse files allow efficient storage of large files with holes (unallocated regions), saving disk space.
