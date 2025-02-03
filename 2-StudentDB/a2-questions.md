@@ -76,14 +76,8 @@ Please answer the following questions and submit in your repo for the second ass
     ```
     In this implementation the storage for the student record is allocated on the heap using `malloc()` and passed back to the caller when the function returns. What do you think about this alternative implementation of `get_student(...)`?  Address in your answer why it work work, but also think about any potential problems it could cause.  
     
-    > **ANSWER:** This implementation works because the storage for the student record is allocated on the heap, which persists after the function returns. However, it introduces potential issues:
-
-Memory Management Responsibility: The caller must remember to free the allocated memory to avoid memory leaks. If the caller forgets to call free(), the program will leak memory.
-
-Error Handling: If malloc() fails (e.g., due to insufficient memory), the function returns NULL, which the caller must handle appropriately.
-
+    > **ANSWER:** This implementation works because the storage for the student record is allocated on the heap, which persists after the function returns. However, it introduces potential issues:Memory Management Responsibility: The caller must remember to free the allocated memory to avoid memory leaks. If the caller forgets to call free(), the program will leak memory.Error Handling: If malloc() fails (e.g., due to insufficient memory), the function returns NULL, which the caller must handle appropriately.
 Performance Overhead: Frequent allocation and deallocation of small memory blocks can lead to fragmentation and performance degradation.
-
 While this approach is valid, it shifts the burden of memory management to the caller, which can be error-prone.
 
 
@@ -116,13 +110,7 @@ While this approach is valid, it shifts the burden of memory management to the c
 
     - Please explain why the file size reported by the `ls` command was 128 bytes after adding student with ID=1, 256 after adding student with ID=3, and 4160 after adding the student with ID=64? 
 
-        > **ANSWER:** The file size reported by ls corresponds to the logical size of the file, which is determined by the file's metadata. When a student is added, the file is extended to accommodate the new record. For example:
-
-Adding student ID=1 writes 64 bytes, so the file size becomes 128 bytes (likely due to alignment or metadata).
-
-Adding student ID=3 writes another 64 bytes, increasing the file size to 256 bytes.
-
-Adding student ID=64 writes a record at an offset of 64 * 64 = 4096 bytes, extending the file size to 4160 bytes.
+        > **ANSWER:** The file size reported by ls corresponds to the logical size of the file, which is determined by the file's metadata. When a student is added, the file is extended to accommodate the new record. For example:Adding student ID=1 writes 64 bytes, so the file size becomes 128 bytes (likely due to alignment or metadata).Adding student ID=3 writes another 64 bytes, increasing the file size to 256 bytes.Adding student ID=64 writes a record at an offset of 64 * 64 = 4096 bytes, extending the file size to 4160 bytes.
 
 
 
