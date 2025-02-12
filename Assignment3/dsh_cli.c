@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "dshlib.h"
+#include "dragon.h"
 
 int main()
 {
@@ -22,6 +23,12 @@ int main()
 
         if (strcmp(cmd_buff, EXIT_CMD) == 0) {
             break;
+        }
+
+        // Handle dragon command using compressed data
+        if (strcmp(cmd_buff, "dragon") == 0) {
+            print_dragon();
+            continue;
         }
 
         rc = build_cmd_list(cmd_buff, &clist);
