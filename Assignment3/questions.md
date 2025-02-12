@@ -1,30 +1,115 @@
 1. In this assignment I suggested you use `fgets()` to get user input in the main while loop. Why is `fgets()` a good choice for this application?
 
-    > **Answer**:  _start here_
+    > **Answer**:  fgets() is a good choice for reading user input in this application for several reasons:
+
+Safety: fgets() reads a specified number of characters from the input stream, which helps prevent buffer overflow. This is crucial for security, as it ensures that the input does not exceed the allocated buffer size.
+
+Ease of Use: fgets() reads an entire line of input, including spaces, until it encounters a newline character or reaches the end of the specified buffer size. This makes it easy to handle multi-word commands and arguments.
+
+Portability: fgets() is a standard C library function, making it portable across different platforms and compilers.
+
+Handling Newlines: fgets() includes the newline character in the input buffer, which can be easily removed using strcspn() or similar functions, as shown in the code.
 
 2. You needed to use `malloc()` to allocte memory for `cmd_buff` in `dsh_cli.c`. Can you explain why you needed to do that, instead of allocating a fixed-size array?
 
-    > **Answer**:  _start here_
+    > **Answer**:  Dynamic Memory Allocation: malloc() allows for dynamic memory allocation, meaning the size of the buffer can be determined at runtime rather than being fixed at compile time. This is useful if the size of the input can vary significantly.
+
+Flexibility: With malloc(), you can allocate exactly the amount of memory needed for the input, which can be more efficient in terms of memory usage compared to a fixed-size array that might be larger than necessary.
+
+Avoiding Stack Overflow: Large fixed-size arrays can lead to stack overflow, especially in environments with limited stack space. Using malloc() allocates memory on the heap, which is typically much larger than the stack.
+
+Resizing: If needed, you can resize the buffer using realloc() if the input size changes, which is not possible with a fixed-size array.
+
+
 
 
 3. In `dshlib.c`, the function `build_cmd_list(`)` must trim leading and trailing spaces from each command before storing it. Why is this necessary? If we didn't trim spaces, what kind of issues might arise when executing commands in our shell?
 
-    > **Answer**:  _start here_
+    > **Answer**: Trimming leading and trailing spaces from each command before storing it is necessary for several reasons:
+
+Correct Command Parsing: Extra spaces can interfere with the correct parsing of commands and arguments. For example, a command with leading spaces might not be recognized correctly, or arguments with trailing spaces might be misinterpreted.
+
+Consistency: Trimming spaces ensures that commands and arguments are stored in a consistent format, which simplifies further processing and execution.
+
+Avoiding Errors: Commands with unexpected spaces might fail to execute correctly or produce unexpected results. For example, a command like " ls " might not be recognized as the ls command due to the extra spaces.
+
+User Experience: Users might accidentally include extra spaces when typing commands. Trimming these spaces improves the user experience by making the shell more forgiving of such mistakes.
+
 
 4. For this question you need to do some research on STDIN, STDOUT, and STDERR in Linux. We've learned this week that shells are "robust brokers of input and output". Google _"linux shell stdin stdout stderr explained"_ to get started.
 
 - One topic you should have found information on is "redirection". Please provide at least 3 redirection examples that we should implement in our custom shell, and explain what challenges we might have implementing them.
 
-    > **Answer**:  _start here_
+    > **Answer**:  Redirection in a shell allows you to control where the input and output of commands go. Here are three examples of redirection and the challenges they might present:
+
+Output Redirection (>):
+
+Example: ls > file.txt
+
+Explanation: This command redirects the output of ls to file.txt instead of the terminal.
+
+Challenge: Implementing this requires opening the file in write mode and redirecting the command's STDOUT to the file. Handling file permissions and errors (e.g., if the file cannot be opened) is crucial.
+
+Input Redirection (<):
+
+Example: sort < file.txt
+
+Explanation: This command redirects the contents of file.txt as input to the sort command.
+
+Challenge: The shell must open the file and feed its contents to the command's STDIN. Handling large files and ensuring the command can process the input correctly are potential challenges.
+
+Appending Output (>>):
+
+Example: echo "new line" >> file.txt
+
+Explanation: This command appends the output of echo to the end of file.txt without overwriting it.
+
+Challenge: Similar to output redirection, but the file must be opened in append mode. Ensuring atomic writes and handling file locks (if necessary) are additional considerations.
 
 - You should have also learned about "pipes". Redirection and piping both involve controlling input and output in the shell, but they serve different purposes. Explain the key differences between redirection and piping.
 
-    > **Answer**:  _start here_
+    > **Answer**:  Redirection:
+
+Purpose: Redirection is used to change the source or destination of a command's input or output.
+
+Usage: It typically involves files or devices. For example, > redirects output to a file, and < redirects input from a file.
+
+Direction: Redirection can be either input or output.
+
+Piping:
+
+Purpose: Piping is used to connect the output of one command directly to the input of another command.
+
+Usage: It involves commands only. For example, ls | grep .txt pipes the output of ls to grep.
+
+Direction: Piping is unidirectional, from the output of one command to the input of another.
+
+
 
 - STDERR is often used for error messages, while STDOUT is for regular output. Why is it important to keep these separate in a shell?
 
-    > **Answer**:  _start here_
+    > **Answer**:  Keeping STDERR and STDOUT separate is important for several reasons:
+
+Error Handling: STDERR is specifically for error messages, allowing users and scripts to easily distinguish between regular output and errors.
+
+Debugging: Separating errors from standard output makes it easier to debug issues, as error messages are not mixed with regular output.
+
+Logging: In scripts and automated processes, STDERR can be logged separately for monitoring and troubleshooting purposes.
+
+User Experience: Users can redirect or suppress error messages independently of regular output, providing more control over the command's behavior.
 
 - How should our custom shell handle errors from commands that fail? Consider cases where a command outputs both STDOUT and STDERR. Should we provide a way to merge them, and if so, how?
 
-    > **Answer**:  _start here_
+    > **Answer**: In a custom shell, handling errors from commands that fail involves several considerations:
+
+Separate Streams: By default, STDOUT and STDERR should remain separate to maintain clarity between regular output and error messages.
+
+Error Reporting: The shell should report errors clearly, possibly by printing them to STDERR and providing a non-zero exit status.
+
+Merging Streams: If needed, the shell can provide an option to merge STDOUT and STDERR. This can be done using redirection, for example:
+
+command 2>&1: Redirects STDERR to STDOUT, merging the two streams.
+
+User Control: The shell should allow users to decide whether to merge streams or keep them separate, depending on their needs. This can be implemented through command-line options or shell configuration.
+
+By carefully managing STDOUT and STDERR, the shell can provide a robust and user-friendly environment for executing commands and handling errors.
