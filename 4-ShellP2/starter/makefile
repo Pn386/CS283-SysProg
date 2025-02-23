@@ -1,31 +1,22 @@
-# Compiler settings
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-
-# Target executable name
+SOURCES = dsh_cli.c dshlib.c
+OBJECTS = $(SOURCES:.c=.o)
 TARGET = dsh
 
-# Find all source and header files
-SRCS = $(wildcard *.c)
-HDRS = $(wildcard *.h)
+.PHONY: all clean test
 
-# Default target
 all: $(TARGET)
 
-# Compile source to executable
-$(TARGET): $(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $(TARGET)
 
-# Clean up build files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test: all
+	chmod +x dsh
+	bats ./bats/assignment_tests.sh ./bats/student_tests.sh
+
 clean:
-	rm -f $(TARGET)
-
-test:
-	bats $(wildcard ./bats/*.sh)
-
-valgrind:
-	echo "pwd\nexit" | valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./$(TARGET) 
-	echo "pwd\nexit" | valgrind --tool=helgrind --error-exitcode=1 ./$(TARGET) 
-
-# Phony targets
-.PHONY: all clean test
+	rm -f $(OBJECTS) $(TARGET) *~
