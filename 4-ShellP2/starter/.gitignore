@@ -1,1 +1,4 @@
+echo "*.o
+*.dSYM/
 dsh
+.dragon.h" > .gitignore
